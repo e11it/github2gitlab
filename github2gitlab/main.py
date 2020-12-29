@@ -58,7 +58,7 @@ class GitHub2GitLab(object):
         if not self.args.gitlab_repo:
             self.args.gitlab_repo = self.args.github_repo
         (self.args.gitlab_namespace,
-         self.args.gitlab_name) = self.args.gitlab_repo.split('/')
+         self.args.gitlab_name) = self.args.gitlab_repo.split('/',1)
         self.args.gitlab_repo = parse.quote_plus(self.args.gitlab_repo)
 
         self.github = {
@@ -74,6 +74,7 @@ class GitHub2GitLab(object):
             'host': self.args.gitlab_url,
             'name': self.args.gitlab_name,
             'namespace': self.args.gitlab_namespace,
+            'namespace_id': self.args.gitlab_namespace_id,
             'url': self.args.gitlab_url + "/api/v4",
             'repo': self.args.gitlab_repo,
             'token': self.args.gitlab_token,
@@ -101,6 +102,8 @@ class GitHub2GitLab(object):
                             required=True)
         parser.add_argument('--gitlab-repo',
                             help='Gitlab repo (for instance ceph/ceph)')
+        parser.add_argument('--gitlab-namespace-id',
+                            help='Gitlab namespace id')
         parser.add_argument('--github-token',
                             help='GitHub authentication token')
         parser.add_argument('--github-repo',
@@ -292,7 +295,7 @@ class GitHub2GitLab(object):
             log.info("add project " + g['repo'])
             url = g['url'] + "/projects"
             query['public'] = 'true'
-            query['namespace'] = g['namespace']
+            query['namespace_id'] = g['namespace_id']
             query['name'] = g['name']
             result = requests.post(url, params=query)
             if result.status_code != requests.codes.created:
